@@ -7,88 +7,57 @@ import altair as alt
 app = FastAPI()
 
 allow_origins = [
-    "http://localhost:3000",
-    "https://wettervergleich.vercel.app",
-    "https://wettervergleich-git-main-jonasheinzs-projects.vercel.app/",
-    "https://wettervergleich-jfglsmnhe-jonasheinzs-projects.vercel.app/"
+    "https://pro-lime-tau.vercel.app",
+    "http://localhost:3000"
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
     allow_credentials=True,
-    allow_methods=["*"],
     allow_headers=["*"],
+    allow_methods=["*"],
 )
 
-
-def filter(parameter, date, interval):
-
+def filter(parameter, date):
     data = pd.read_csv("./data/wetterdaten_combined.csv")
 
     data["Datum"] = pd.to_datetime(data["Datum"])
-    endDate = date
-    if interval == "jahr":
-        endDate += pd.DateOffset(years=1)
-    elif interval == "monat":
-        endDate += pd.DateOffset(months=1)
-    elif interval == "woche":
-        endDate += pd.DateOffset(weeks=1)
+    data = data[data["Datum"] == date]
 
-    data = data[data["Datum"] >= date]
-
-    data = data[data["Datum"] <= endDate]
-
-    data = data[data["Parameter"] == parameter]
-    data = data[data["Standort"] == "Zch_Stampfenbachstrasse"]
+    if parameter == "Druck":
+        data = data[data["Parameter"] == "p"]
+    elif parameter == "Temperatur":
+        data = data[data["Parameter"] == "T"]
+    elif parameter == "MaxTemperatur":
+        data = data[data["Parameter"] == "T_max_h1"]
 
     return data
 
-
 def einheit(parameter):
-    if parameter == "T":
+    if parameter == "Temperatur" or parameter == "MaxTemperatur":
         return "°C"
-    elif parameter == "RainDur":
-        return "min"
-    elif parameter == "StrGlo":
-        return "W/m2"
-
+    elif parameter == "Druck":
+        return "hPa"
 
 @app.get("/specs/")
-async def get_spec(parameter, date, year, interval):
+async def get_spec(parameter: str, date: str):
     date = pd.to_datetime(date)
-    dateBefore = date.replace(year=int(year))
-    filtered = filter(parameter, date, interval)
-    filtered["Legende"] = date.year
-    filteredBefore = filter(parameter, dateBefore, interval)
-    filteredBefore["Datum"] += pd.DateOffset(years=int(date.year)-int(year))
-    filteredBefore["Legende"] = year
+    filtered = filter(parameter, date)
+
+    if filtered.empty:
+        return JSONResponse(content={"error": "Keine Daten verfügbar."}, status_code=404)
 
     chart = alt.Chart(filtered).mark_line().encode(
-        alt.X("Datum:T", axis=alt.Axis(format="%b %d"), title=None),
-        alt.Y("Wert:Q", title=einheit(parameter),
-              axis=alt.Axis(titleFontSize=18)), #so
-        alt.Color("Legende:N",  scale=alt.Scale(scheme='viridis'))
-    )
-    chartBefore = alt.Chart(filteredBefore).mark_line().encode(
-        alt.X("Datum:T", axis=alt.Axis(format="%b %d"), title=None),
-        alt.Y("Wert:Q"),
-        alt.Color("Legende:N",  scale=alt.Scale(scheme='viridis'),
-                  legend=alt.Legend(title="Jahr", labelFontSize=18,  titleFontSize=18, orient='bottom',
-                                    ))
+        x=alt.X("Datum:T", title=None),
+        y=alt.Y("Wert:Q", title=einheit(parameter)),
+        color=alt.Color("Parameter:N", title="Parameter")
     ).properties(
-        title=f'Wettervergleich {year} zu {date.year}',
+        title=f"{parameter} am {date.strftime('%Y-%m-%d')}",
         width=600,
-        height=400,
-    )
-
-    mean = filtered['Wert'].mean().round(2)
-    meanBefore = filteredBefore['Wert'].mean().round(2)
-    chartCombined = alt.layer(chart, chartBefore).configure_axis(
-        grid=False
-    ).configure_view(
-        stroke=None,
-    ).configure_title(
-        fontSize=24,
+        height=400
     ).to_dict()
 
-    return JSONResponse(content={"mean": mean, "meanBefore": meanBefore, "einheit": einheit(parameter), "vis": chartCombined})
+    mean = filtered["Wert"].mean().round(2)
+
+    return JSONResponse(content={"mean": mean, "einheit": einheit(parameter), "vis": chart})
