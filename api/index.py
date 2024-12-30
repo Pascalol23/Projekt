@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import pandas as pd
+import csv
+from datetime import datetime, timedelta
 import altair as alt
 
 app = FastAPI()
@@ -20,29 +21,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 def filter(parameter, date, interval):
+    data = []
+    with open("./data/wetterdaten_combined.csv", "r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            row["Datum"] = datetime.strptime(row["Datum"], "%Y-%m-%d %H:%M:%S%z")
+            row["Wert"] = float(row["Wert"])
+            if row["Parameter"] == parameter and row["Standort"] == "Zch_Stampfenbachstrasse":
+                data.append(row)
 
-    data = pd.read_csv("./data/wetterdaten_combined.csv")
-
-    data["Datum"] = pd.to_datetime(data["Datum"])
     endDate = date
     if interval == "jahr":
-        endDate += pd.DateOffset(years=1)
+        endDate += timedelta(days=365)
     elif interval == "monat":
-        endDate += pd.DateOffset(months=1)
+        endDate += timedelta(days=30)
     elif interval == "woche":
-        endDate += pd.DateOffset(weeks=1)
+        endDate += timedelta(weeks=1)
 
-    data = data[data["Datum"] >= date]
-
-    data = data[data["Datum"] <= endDate]
-
-    data = data[data["Parameter"] == parameter]
-    data = data[data["Standort"] == "Zch_Stampfenbachstrasse"]
-
-    return data
-
+    filtered_data = [row for row in data if date <= row["Datum"] <= endDate]
+    return filtered_data
 
 def einheit(parameter):
     if parameter == "T":
@@ -52,37 +50,38 @@ def einheit(parameter):
     elif parameter == "StrGlo":
         return "W/m2"
 
-
 @app.get("/specs/")
-async def get_spec(parameter, date, year, interval):
-    date = pd.to_datetime(date)
+async def get_spec(parameter: str, date: str, year: int, interval: str):
+    date = datetime.strptime(date, "%Y-%m-%d")
     dateBefore = date.replace(year=int(year))
     filtered = filter(parameter, date, interval)
-    filtered["Legende"] = date.year
+    for row in filtered:
+        row["Legende"] = date.year
+
     filteredBefore = filter(parameter, dateBefore, interval)
-    filteredBefore["Datum"] += pd.DateOffset(years=int(date.year)-int(year))
-    filteredBefore["Legende"] = year
+    for row in filteredBefore:
+        row["Datum"] += timedelta(days=(date.year - int(year)) * 365)
+        row["Legende"] = year
 
     chart = alt.Chart(filtered).mark_line().encode(
         alt.X("Datum:T", axis=alt.Axis(format="%b %d"), title=None),
         alt.Y("Wert:Q", title=einheit(parameter),
-              axis=alt.Axis(titleFontSize=18)), #so
-        alt.Color("Legende:N",  scale=alt.Scale(scheme='viridis'))
+              axis=alt.Axis(titleFontSize=18)),
+        alt.Color("Legende:N", scale=alt.Scale(scheme='viridis'))
     )
     chartBefore = alt.Chart(filteredBefore).mark_line().encode(
         alt.X("Datum:T", axis=alt.Axis(format="%b %d"), title=None),
         alt.Y("Wert:Q"),
-        alt.Color("Legende:N",  scale=alt.Scale(scheme='viridis'),
-                  legend=alt.Legend(title="Jahr", labelFontSize=18,  titleFontSize=18, orient='bottom',
-                                    ))
+        alt.Color("Legende:N", scale=alt.Scale(scheme='viridis'),
+                  legend=alt.Legend(title="Jahr", labelFontSize=18, titleFontSize=18, orient='bottom'))
     ).properties(
         title=f'Wettervergleich {year} zu {date.year}',
         width=600,
         height=400,
     )
 
-    mean = filtered['Wert'].mean().round(2)
-    meanBefore = filteredBefore['Wert'].mean().round(2)
+    mean = sum([row['Wert'] for row in filtered]) / len(filtered) if filtered else 0
+    meanBefore = sum([row['Wert'] for row in filteredBefore]) / len(filteredBefore) if filteredBefore else 0
     chartCombined = alt.layer(chart, chartBefore).configure_axis(
         grid=False
     ).configure_view(
@@ -91,4 +90,4 @@ async def get_spec(parameter, date, year, interval):
         fontSize=24,
     ).to_dict()
 
-    return JSONResponse(content={"mean": mean, "meanBefore": meanBefore, "einheit": einheit(parameter), "vis": chartCombined})
+    return JSONResponse(content={"mean": round(mean, 2), "meanBefore": round(meanBefore, 2), "einheit": einheit(parameter), "vis": chartCombined})
