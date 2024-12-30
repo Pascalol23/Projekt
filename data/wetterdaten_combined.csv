@@ -1,0 +1,18 @@
+Datum,Standort,Parameter,Intervall,Einheit,Wert,Status,Jahr
+1992-07-01 00:00:00+01:00,Zch_Stampfenbachstrasse,StrGlo,d1,W/m2,135.06,bereinigt,1992
+1992-07-01 00:00:00+01:00,Zch_Stampfenbachstrasse,T,d1,°C,18.99,bereinigt,1992
+1992-07-01 00:00:00+01:00,Zch_Stampfenbachstrasse,p,d1,hPa,963.06,bereinigt,1992
+1992-07-01 00:00:00+01:00,Zch_Stampfenbachstrasse,T_max_h1,d1,°C,21.72,bereinigt,1992
+1992-07-02 00:00:00+01:00,Zch_Stampfenbachstrasse,StrGlo,d1,W/m2,149.37,bereinigt,1992
+1992-07-02 00:00:00+01:00,Zch_Stampfenbachstrasse,T,d1,°C,18.36,bereinigt,1992
+1992-07-02 00:00:00+01:00,Zch_Stampfenbachstrasse,p,d1,hPa,965.23,bereinigt,1992
+1992-07-02 00:00:00+01:00,Zch_Stampfenbachstrasse,T_max_h1,d1,°C,21.98,bereinigt,1992
+1992-07-03 00:00:00+01:00,Zch_Stampfenbachstrasse,StrGlo,d1,W/m2,247.37,bereinigt,1992
+1992-07-03 00:00:00+01:00,Zch_Stampfenbachstrasse,T,d1,°C,21.47,bereinigt,1992
+1992-07-03 00:00:00+01:00,Zch_Stampfenbachstrasse,p,d1,hPa,965.09,bereinigt,1992
+1992-07-03 00:00:00+01:00,Zch_Stampfenbachstrasse,T_max_h1,d1,°C,26.3,bereinigt,1992
+1992-07-04 00:00:00+01:00,Zch_Stampfenbachstrasse,StrGlo,d1,W/m2,73.66,bereinigt,1992
+1992-07-04 00:00:00+01:00,Zch_Stampfenbachstrasse,T,d1,°C,17.53,bereinigt,1992
+1992-07-04 00:00:00+01:00,Zch_Stampfenbachstrasse,p,d1,hPa,960.75,bereinigt,1992
+1992-07-04 00:00:00+01:00,Zch_Stampfenbachstrasse,T_max_h1,d1,°C,20.55,bereinigt,1992
+

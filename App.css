@@ -1,0 +1,27 @@
+#content {
+  margin-top: 20px;
+  background-color: #17153b;
+  padding: 30px;
+  padding-left: 18vw;
+  padding-right: 18vw;
+}
+header {
+  padding-top: 30px;
+  color: black;
+  padding-left: 18vw;
+  padding-right: 18vw;
+}
+#side {
+  background-color: white;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+.MuiTable-root,
+.MuiTypography-h5 {
+  background-color: #17153b;
+}
+.MuiTableContainer-root {
+  border: 1px solid white;
+}
