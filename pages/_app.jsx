@@ -8,6 +8,8 @@ function App() {
 
   return (
     <Box sx={{ p: 3 }}>
+      <h1>Wetterapp</h1>
+      <p>Wählen Sie einen Parameter aus</p>
       <ParameterForm setChartSpec={setChartSpec} />
       {chartSpec && <LineChart spec={chartSpec} />}
     </Box>

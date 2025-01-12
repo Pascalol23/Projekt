@@ -19,9 +19,12 @@ function ParameterForm({ setChartSpec }) {
   const [startDate, setStartDate] = useState(dayjs().startOf("month"));
   const [endDate, setEndDate] = useState(dayjs().endOf("month"));
 
+  // Dynamische URL für das Backend
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/get-linechart", {
+      const response = await axios.get(`${apiUrl}/get-linechart`, {
         params: {
           parameter,
           start_date: startDate.format("YYYY-MM-DD"),
