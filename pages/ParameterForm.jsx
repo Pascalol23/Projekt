@@ -19,7 +19,6 @@ function ParameterForm({ setChartSpec }) {
   const [startDate, setStartDate] = useState(dayjs().startOf("month"));
   const [endDate, setEndDate] = useState(dayjs().endOf("month"));
 
-  // Dynamische URL für das Backend
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   const fetchData = async () => {
@@ -50,7 +49,6 @@ function ParameterForm({ setChartSpec }) {
           >
             <MenuItem value="T">Temperatur</MenuItem>
             <MenuItem value="RainDur">Niederschlagsdauer</MenuItem>
-            <MenuItem value="StrGlo">Globalstrahlung</MenuItem>
             <MenuItem value="p">Luftdruck</MenuItem>
           </Select>
         </FormControl>

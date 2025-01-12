@@ -13,7 +13,6 @@ async def create_linechart(parameter: str, start_date: str, end_date: str, locat
         with open(file_path, newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile, delimiter=';')
             for row in reader:
-                # Nur relevante Zeilen speichern
                 if row["Standort"] == location and parameter in row:
                     datum = datetime.strptime(row["Datum"], "%d.%m.%Y")
                     if datetime.strptime(start_date, "%Y-%m-%d") <= datum <= datetime.strptime(end_date, "%Y-%m-%d"):
@@ -32,7 +31,6 @@ async def create_linechart(parameter: str, start_date: str, end_date: str, locat
             height=400,
         )
 
-        # Diagramm zurückgeben
         return JSONResponse(content=chart.to_dict())
 
     except Exception as e:
