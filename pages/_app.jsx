@@ -1,36 +1,60 @@
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
-import "../App.css";
-import { useState } from "react";
-import { VegaViewer } from "./VegaViewer";
-import { VegaForm } from "./VegaForm";
-import Grid from "@mui/material/Grid2";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
+import Header from "./Header"; // Header importieren
 
-export default function App() {
-  const [spec, setSpec] = useState({});
-  const darkTheme = createTheme({
-    palette: {
-      mode: "dark",
-    },
-  });
+function App() {
+  const [parameter, setParameter] = useState(""); // State für das ausgewählte Dropdown
+  const [parameters, setParameters] = useState([]); // State für die Parameter aus der API
+
+  // API-Aufruf, um die Parameter zu bekommen
+  useEffect(() => {
+    fetch("http://localhost:8000/get-parameter")
+      .then((response) => response.json())
+      .then((data) => {
+        setParameters(data.parameters); // Parameter aus API setzen
+      });
+  }, []);
+
+  const handleChange = (event) => {
+    setParameter(event.target.value); // Aktualisiert den ausgewählten Parameter
+  };
 
   return (
-    <>
-      <div id="side">
-        <ThemeProvider theme={darkTheme}>
-          <CssBaseline />
-          <div id="content">
-            <Grid container spacing={2}>
-              <Grid size={4}>
-                <VegaForm setSpec={setSpec} />
-              </Grid>
-              <Grid size={8}>
-                <VegaViewer spec={spec.vis} />
-              </Grid>
-            </Grid>
-          </div>
-        </ThemeProvider>
-      </div>
-    </>
+    <Box sx={{ p: 3 }}>
+      <Header />
+      <Typography variant="h4" sx={{ mb: 2 }}>
+        Wählen Sie einen Parameter aus
+      </Typography>
+      <FormControl fullWidth>
+        <InputLabel id="parameter-label">Parameter</InputLabel>
+        <Select
+          labelId="parameter-label"
+          value={parameter}
+          onChange={handleChange}
+          label="Parameter"
+        >
+          {/* Dropdown mit den aus der API abgerufenen Parametern */}
+          {parameters.map((param) => (
+            <MenuItem key={param} value={param}>
+              {param}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Anzeige des ausgewählten Parameters */}
+      <Typography variant="h6" sx={{ mt: 2 }}>
+        Ausgewählter Parameter: {parameter}
+      </Typography>
+    </Box>
   );
 }
+
+export default App;
