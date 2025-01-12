@@ -16,8 +16,8 @@ import axios from "axios";
 function ParameterForm({ setChartSpec }) {
   const [parameter, setParameter] = useState("T");
   const [location, setLocation] = useState("Zch_Rosengartenstrasse");
-  const [startDate, setStartDate] = useState(dayjs().startOf("month"));
-  const [endDate, setEndDate] = useState(dayjs().endOf("month"));
+  const [startDate, setStartDate] = useState(dayjs("2023-01-01"));
+  const [endDate, setEndDate] = useState(dayjs("2023-12-31"));
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -31,7 +31,7 @@ function ParameterForm({ setChartSpec }) {
           location,
         },
       });
-      setChartSpec(response.data);
+      setChartSpec(response.data); // Diagrammdaten setzen
     } catch (error) {
       console.error("Fehler beim Abrufen der Daten:", error);
     }
@@ -73,11 +73,15 @@ function ParameterForm({ setChartSpec }) {
         <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
           <DatePicker
             label="Startdatum"
+            minDate={dayjs("2023-01-01")}
+            maxDate={dayjs("2023-12-31")}
             value={startDate}
             onChange={(newValue) => setStartDate(newValue)}
           />
           <DatePicker
             label="Enddatum"
+            minDate={dayjs("2023-01-01")}
+            maxDate={dayjs("2023-12-31")}
             value={endDate}
             onChange={(newValue) => setEndDate(newValue)}
           />

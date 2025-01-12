@@ -3,12 +3,10 @@ from datetime import datetime
 from fastapi.responses import JSONResponse
 import altair as alt
 
-# Pfad zur CSV-Datei
 file_path = "./data/wetterdaten_combined.csv"
 
 async def create_linechart(parameter: str, start_date: str, end_date: str, location: str):
     try:
-        # CSV-Datei lesen
         data = []
         with open(file_path, newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile, delimiter=';')
@@ -21,7 +19,6 @@ async def create_linechart(parameter: str, start_date: str, end_date: str, locat
         if not data:
             return {"error": "Keine Daten für diesen Filter gefunden."}
 
-        # Liniendiagramm erstellen
         chart = alt.Chart(alt.Data(values=data)).mark_line().encode(
             x=alt.X("Datum:T", title="Datum"),
             y=alt.Y("Wert:Q", title=f"{parameter} (Wert)"),
