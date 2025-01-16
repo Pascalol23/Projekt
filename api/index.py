@@ -4,9 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from datetime import datetime
 import json
-import os
 
-data_file_path = os.path.join(os.getcwd(), "..", "src", "meteodaten_2023_daily.json")
+data_file_path = "/data/meteodaten_2023_daily.json")
 
 
 app = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
@@ -23,11 +22,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-try:
-    with open(data_file_path, "r") as f:
-        weather_data = json.load(f)
-except FileNotFoundError:
-    raise RuntimeError(f"Die Datei 'meteodaten_2023_daily.json' wurde im Ordner 'src' nicht gefunden.")
+
+with open(data_file_path, "r") as f:
+    weather_data = json.load(f)
+
 
 @app.get("/api/py/data")
 def get_data(date: str, station: str = Query(None)):
