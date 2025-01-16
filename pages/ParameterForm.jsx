@@ -19,8 +19,7 @@ function ParameterForm({ setChartSpec }) {
   const [startDate, setStartDate] = useState(dayjs("2023-01-01"));
   const [endDate, setEndDate] = useState(dayjs("2023-12-31"));
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "https://pro-lime-tau.vercel.app/";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   const fetchData = async () => {
     try {
