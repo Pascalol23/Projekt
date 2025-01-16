@@ -28,7 +28,7 @@ with open(data_file_path, "r") as f:
 
 
 @app.get("/api/py/data")
-def get_data(date: str, station: str = Query(None)):
+async def get_data(date: str, station: str = Query(None)):
     try:
         timestamp = int(datetime.strptime(date, "%Y-%m-%d").timestamp()) * 1000
         daily_data = defaultdict(list)
@@ -56,7 +56,7 @@ def get_data(date: str, station: str = Query(None)):
         return JSONResponse(content={"error": str(e)}, status_code=400)
 
 @app.get("/api/py/getWeatherStations")
-def fetchWeatherStations():
+async def fetchWeatherStations():
     stations = [{"key": entry["Station"], "name": entry["Stationsname"]} for entry in weather_data]
     unique_stations = {station["key"]: station for station in stations}.values()
     return JSONResponse(content=list(unique_stations))
