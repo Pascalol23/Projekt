@@ -1,49 +1,43 @@
 import React, { useState, useEffect } from "react";
+import { Vega } from "react-vega";
+import axios from "axios";
 import {
   Container,
-  Typography,
-  TextField,
   Button,
   Select,
+  Typography,
+  TextField,
   MenuItem,
   FormControl,
   InputLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
 } from "@mui/material";
-import { Vega } from "react-vega";
-import axios from "axios";
 
 const App = () => {
   const [date, setDate] = useState("");
-  const [station, setStation] = useState("");
-  const [stations, setStations] = useState([]);
   const [data, setData] = useState([]);
+  const [stations, setStations] = useState([]);
+  const [station, setStation] = useState("");
+  const [parameter, setParameter] = useState("all");
   const [charts, setCharts] = useState(null);
-  const [parameter, setParameter] = useState("all"); // Neuer Zustand für Parameter
 
   const backendUrl =
     process.env.REACT_APP_BACKEND_URL ||
     (typeof window !== "undefined" && window.location.hostname === "localhost"
       ? "http://127.0.0.1:8000"
-      : "https://pro-lime-tau.vercel.app/");
+      : "https://g.vercel.app");
 
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const response = await axios.get(`${backendUrl}/api/py/stations`);
-        console.log("Fetched stations:", response.data);
+        const response = await axios.get(
+          `${backendUrl}/api/py/getWeatherStations`
+        );
         setStations(response.data);
       } catch (error) {
         console.error("Error fetching stations:", error);
+        alert("Error fetching stations. Check the backend connection.");
       }
     };
-
     fetchStations();
   }, [backendUrl]);
 
@@ -52,56 +46,52 @@ const App = () => {
       const response = await axios.get(
         `${backendUrl}/api/py/data?date=${date}&station=${station}&parameter=${parameter}`
       );
-      setData([]);
       setData(response.data);
 
-      const month = new Date(date).getMonth() + 1;
-      const year = new Date(date).getFullYear();
       const chartsResponse = await axios.get(
-        `${backendUrl}/api/py/monthly_charts?month=${month}&year=${year}&station=${station}`
+        `${backendUrl}/api/py/data?date=${date}&station=${station}`
       );
       setCharts(chartsResponse.data);
     } catch (error) {
       console.error("Error fetching data:", error);
+      alert("Error fetching data. Please check the server.");
     }
   };
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
-        Wetterdaten 2023 Zürich <br />
+      <Typography variant="h5" gutterBottom>
+        Abfrage Wetterdaten Zürich 2023 <br />
         Stationen: <br />
-        -Rosengartenstrasse <br />
-        -Schimmelstrasse
-        <br />
-        -Stampfenbachstrasse
+        <ul>
+          <li>Schimmelstrasse</li>
+          <li>Stampfenbachstrasse</li>
+          <li>Rosengartenstrasse</li>
+        </ul>
       </Typography>
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="station-label">Wetterstationen</InputLabel>
+        <Select
+          labelId="station-label"
+          value={station}
+          onChange={(e) => setStation(e.target.value)}
+        >
+          {stations.map((station) => (
+            <MenuItem key={station.key} value={station.key}>
+              {station.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
       <TextField
-        label="Datum (YYYY-MM-DD)"
+        label="Bitte Datum in (2023-MM-DD) angeben"
         variant="outlined"
         fullWidth
         margin="normal"
         value={date}
         onChange={(e) => setDate(e.target.value)}
       />
-      <FormControl fullWidth margin="normal">
-        <InputLabel id="station-label">Wetterstation</InputLabel>
-        <Select
-          labelId="station-label"
-          value={station}
-          onChange={(e) => setStation(e.target.value)}
-        >
-          {stations.length > 0 ? (
-            stations.map((station) => (
-              <MenuItem key={station.key} value={station.key}>
-                {station.name}
-              </MenuItem>
-            ))
-          ) : (
-            <MenuItem disabled>Keine Stationen verfügbar</MenuItem>
-          )}
-        </Select>
-      </FormControl>
 
       <FormControl fullWidth margin="normal">
         <InputLabel id="parameter-label">Parameter</InputLabel>
@@ -110,78 +100,29 @@ const App = () => {
           value={parameter}
           onChange={(e) => setParameter(e.target.value)}
         >
-          <MenuItem value="all">Alle</MenuItem>
-          <MenuItem value="RainDur">Niederschlagsdauer</MenuItem>
-          <MenuItem value="T">Temperatur</MenuItem>
-          <MenuItem value="p">Luftdruck</MenuItem>
+          <MenuItem value="RainDur">Temperatur</MenuItem>
+          <MenuItem value="T">Luftdruck</MenuItem>
+          <MenuItem value="p">Niederschlagsdauer</MenuItem>
         </Select>
       </FormControl>
 
       <Button
         variant="contained"
-        color="primary"
         fullWidth
         onClick={handleFetchData}
-        style={{ marginTop: "16px" }}
+        style={{
+          marginTop: "20px",
+          backgroundColor: "#f44336",
+          color: "white",
+        }}
       >
-        Daten abrufen
+        Diagramme anzeigen lassen
       </Button>
-
-      <TableContainer component={Paper} style={{ marginTop: "20px" }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <strong>Standortname</strong>
-              </TableCell>
-              {parameter === "all" || parameter === "RainDur" ? (
-                <TableCell>
-                  <strong>Regendauer [Minuten]</strong>
-                </TableCell>
-              ) : null}
-              {parameter === "all" || parameter === "T" ? (
-                <TableCell>
-                  <strong>Durchschnittliche Temperatur [°C]</strong>
-                </TableCell>
-              ) : null}
-              {parameter === "all" || parameter === "p" ? (
-                <TableCell>
-                  <strong>Luftdruck [hPa]</strong>
-                </TableCell>
-              ) : null}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data && data.length > 0 ? (
-              data.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell>{row.Standortname}</TableCell>
-                  {parameter === "all" || parameter === "RainDur" ? (
-                    <TableCell>{row.RainDur}</TableCell>
-                  ) : null}
-                  {parameter === "all" || parameter === "T" ? (
-                    <TableCell>{row.T}</TableCell>
-                  ) : null}
-                  {parameter === "all" || parameter === "p" ? (
-                    <TableCell>{row.p}</TableCell>
-                  ) : null}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} align="center">
-                  Keine Daten verfügbar
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
 
       {charts && (
         <div style={{ marginTop: "40px", textAlign: "center" }}>
           <Typography variant="h5" gutterBottom>
-            Visualisierungen
+            Diagramme:
           </Typography>
           <div
             style={{
