@@ -32,7 +32,12 @@ function ParameterForm({ setChartSpec }) {
           location,
         },
       });
-      setChartSpec(response.data); // Diagrammdaten setzen
+
+      if (response.data) {
+        setChartSpec(response.data); // Diagrammdaten setzen
+      } else {
+        console.error("Keine Daten zurückgegeben.");
+      }
     } catch (error) {
       console.error("Fehler beim Abrufen der Daten:", error);
     }

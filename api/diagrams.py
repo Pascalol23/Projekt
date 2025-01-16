@@ -14,10 +14,13 @@ async def create_linechart(parameter: str, start_date: str, end_date: str, locat
                 if row["Standort"] == location and parameter in row:
                     datum = datetime.strptime(row["Datum"], "%d.%m.%Y")
                     if datetime.strptime(start_date, "%Y-%m-%d") <= datum <= datetime.strptime(end_date, "%Y-%m-%d"):
-                        data.append({"Datum": datum, "Wert": float(row[parameter])})
+                        data.append({"Datum": datum.strftime("%Y-%m-%d"), "Wert": float(row[parameter])})
 
         if not data:
-            return {"error": "Keine Daten für diesen Filter gefunden."}
+            return JSONResponse(
+                content={"error": "Keine Daten für diesen Filter gefunden."},
+                status_code=404,
+            )
 
         chart = alt.Chart(alt.Data(values=data)).mark_line().encode(
             x=alt.X("Datum:T", title="Datum"),
@@ -31,4 +34,7 @@ async def create_linechart(parameter: str, start_date: str, end_date: str, locat
         return JSONResponse(content=chart.to_dict())
 
     except Exception as e:
-        return {"error": str(e)}
+        return JSONResponse(
+            content={"error": f"Fehler bei der Verarbeitung: {str(e)}"},
+            status_code=500,
+        )

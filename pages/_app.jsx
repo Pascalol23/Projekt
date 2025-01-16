@@ -1,18 +1,17 @@
-import { Box } from "@mui/material";
+import { useState } from "react";
 import ParameterForm from "./ParameterForm";
 import LineChart from "./LineChart";
-import { useState } from "react";
+import Header from "./Header";
 
 function App() {
-  const [chartSpec, setChartSpec] = useState(null);
+  const [chartSpec, setChartSpec] = useState(null); // Zustand für das Diagramm
 
   return (
-    <Box sx={{ p: 3 }}>
-      <h1>Wetterapp</h1>
-      <p>Wählen Sie einen Parameter aus</p>
+    <div>
+      <Header />
       <ParameterForm setChartSpec={setChartSpec} />
-      {chartSpec && <LineChart spec={chartSpec} />}
-    </Box>
+      <LineChart spec={chartSpec} /> {/* Diagramm anzeigen */}
+    </div>
   );
 }
 
