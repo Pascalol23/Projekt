@@ -1,4 +1,4 @@
-import csv
+import json
 from datetime import datetime
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,29 +16,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pfad zur Wetterdaten-CSV-Datei
-file_path = "./data/wetterdaten_combined.csv"
+# Pfad zur Wetterdaten-JSON-Datei
+file_path = "./data/meteodaten_2023_daily.json"
+
+# Daten laden
+def load_weather_data():
+    try:
+        with open(file_path, "r", encoding="utf-8") as jsonfile:
+            return json.load(jsonfile)
+    except FileNotFoundError:
+        raise RuntimeError(f"Die Datei '{file_path}' wurde nicht gefunden.")
+
+weather_data = load_weather_data()
 
 # Funktion zum Erstellen des Liniendiagramms
 async def create_linechart(parameter: str, start_date: str, end_date: str, location: str):
     try:
         data = []
 
-        # CSV-Datei lesen und filtern
-        with open(file_path, newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile, delimiter=';')
-            for row in reader:
-                if row["Standort"] == location and parameter in row:
-                    # Datum korrekt parsen
-                    datum = datetime.strptime(row["Datum"], "%d.%m.%Y")
-                    # Filter nach Datum
-                    if datetime.strptime(start_date, "%Y-%m-%d") <= datum <= datetime.strptime(end_date, "%Y-%m-%d"):
-                        # Daten sammeln
-                        try:
-                            wert = float(row[parameter])  # Sicherstellen, dass der Parameter existiert
-                            data.append({"Datum": datum.strftime("%Y-%m-%d"), "Wert": wert})
-                        except ValueError:
-                            continue  # Überspringe leere oder ungültige Werte
+        # Filtere die Wetterdaten
+        for entry in weather_data:
+            if entry["Standort"] == location and parameter in entry:
+                datum = datetime.fromtimestamp(entry["Datum"] / 1000)
+                if datetime.strptime(start_date, "%Y-%m-%d") <= datum <= datetime.strptime(end_date, "%Y-%m-%d"):
+                    try:
+                        wert = float(entry[parameter])  # Sicherstellen, dass der Parameter existiert
+                        data.append({"Datum": datum.strftime("%Y-%m-%d"), "Wert": wert})
+                    except (ValueError, KeyError):
+                        continue  # Überspringe ungültige Werte
 
         # Keine Daten gefunden
         if not data:

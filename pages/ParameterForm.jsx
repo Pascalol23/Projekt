@@ -16,8 +16,7 @@ import axios from "axios";
 function ParameterForm({ setChartSpec }) {
   const [parameter, setParameter] = useState("T");
   const [location, setLocation] = useState("Zch_Rosengartenstrasse");
-  const [startDate, setStartDate] = useState(dayjs("2023-01-01"));
-  const [endDate, setEndDate] = useState(dayjs("2023-12-31"));
+  const [selectedDate, setSelectedDate] = useState(dayjs("2023-01-01"));
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_URL || "https://pro-lime-tau.vercel.app";
@@ -27,8 +26,7 @@ function ParameterForm({ setChartSpec }) {
       const response = await axios.get(`${apiUrl}/get-linechart`, {
         params: {
           parameter,
-          start_date: startDate.format("YYYY-MM-DD"),
-          end_date: endDate.format("YYYY-MM-DD"),
+          date: selectedDate.format("YYYY-MM-DD"),
           location,
         },
       });
@@ -56,6 +54,8 @@ function ParameterForm({ setChartSpec }) {
             <MenuItem value="T">Temperatur</MenuItem>
             <MenuItem value="RainDur">Niederschlagsdauer</MenuItem>
             <MenuItem value="p">Luftdruck</MenuItem>
+            <MenuItem value="T_max_h1">Maximale Temperatur</MenuItem>
+            <MenuItem value="StrGlo">Globalstrahlung</MenuItem>
           </Select>
         </FormControl>
         <FormControl fullWidth sx={{ mb: 2 }}>
@@ -78,18 +78,11 @@ function ParameterForm({ setChartSpec }) {
         </FormControl>
         <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
           <DatePicker
-            label="Startdatum"
+            label="Datum"
             minDate={dayjs("2023-01-01")}
             maxDate={dayjs("2023-12-31")}
-            value={startDate}
-            onChange={(newValue) => setStartDate(newValue)}
-          />
-          <DatePicker
-            label="Enddatum"
-            minDate={dayjs("2023-01-01")}
-            maxDate={dayjs("2023-12-31")}
-            value={endDate}
-            onChange={(newValue) => setEndDate(newValue)}
+            value={selectedDate}
+            onChange={(newValue) => setSelectedDate(newValue)}
           />
         </Box>
         <Button variant="contained" onClick={fetchData}>
