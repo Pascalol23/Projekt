@@ -5,8 +5,7 @@ from fastapi.responses import JSONResponse
 from datetime import datetime
 import json
 
-data_file_path = "/data/meteodaten_2023_daily.json"
-
+data_file_path = "./api/meteodaten_2023_daily.json"
 
 app = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
 
@@ -22,10 +21,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-with open(data_file_path, "r") as f:
-    weather_data = json.load(f)
-
+try:
+    with open(data_file_path, "r") as f:
+        weather_data = json.load(f)
+except FileNotFoundError:
+    raise RuntimeError(f"Die Datei '{data_file_path}' wurde nicht gefunden.")
 
 @app.get("/api/py/data")
 async def get_data(date: str, station: str = Query(None)):
