@@ -25,6 +25,7 @@ const App = () => {
   const [stations, setStations] = useState([]);
   const [data, setData] = useState([]);
   const [charts, setCharts] = useState(null);
+  const [parameter, setParameter] = useState("all"); // Neuer Zustand für Parameter
 
   const backendUrl =
     process.env.REACT_APP_BACKEND_URL ||
@@ -49,7 +50,7 @@ const App = () => {
   const handleFetchData = async () => {
     try {
       const response = await axios.get(
-        `${backendUrl}/api/py/data?date=${date}&station=${station}`
+        `${backendUrl}/api/py/data?date=${date}&station=${station}&parameter=${parameter}`
       );
       setData([]);
       setData(response.data);
@@ -101,6 +102,21 @@ const App = () => {
           )}
         </Select>
       </FormControl>
+
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="parameter-label">Parameter</InputLabel>
+        <Select
+          labelId="parameter-label"
+          value={parameter}
+          onChange={(e) => setParameter(e.target.value)}
+        >
+          <MenuItem value="all">Alle</MenuItem>
+          <MenuItem value="RainDur">Niederschlagsdauer</MenuItem>
+          <MenuItem value="T">Temperatur</MenuItem>
+          <MenuItem value="p">Luftdruck</MenuItem>
+        </Select>
+      </FormControl>
+
       <Button
         variant="contained"
         color="primary"
@@ -118,15 +134,21 @@ const App = () => {
               <TableCell>
                 <strong>Standortname</strong>
               </TableCell>
-              <TableCell>
-                <strong>Regendauer [Minuten]</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Durchschnittliche Temperatur [°C]</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Luftdruck [hPa]</strong>
-              </TableCell>
+              {parameter === "all" || parameter === "RainDur" ? (
+                <TableCell>
+                  <strong>Regendauer [Minuten]</strong>
+                </TableCell>
+              ) : null}
+              {parameter === "all" || parameter === "T" ? (
+                <TableCell>
+                  <strong>Durchschnittliche Temperatur [°C]</strong>
+                </TableCell>
+              ) : null}
+              {parameter === "all" || parameter === "p" ? (
+                <TableCell>
+                  <strong>Luftdruck [hPa]</strong>
+                </TableCell>
+              ) : null}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -134,9 +156,15 @@ const App = () => {
               data.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell>{row.Standortname}</TableCell>
-                  <TableCell>{row.RainDur}</TableCell>
-                  <TableCell>{row.T}</TableCell>
-                  <TableCell>{row.p}</TableCell>
+                  {parameter === "all" || parameter === "RainDur" ? (
+                    <TableCell>{row.RainDur}</TableCell>
+                  ) : null}
+                  {parameter === "all" || parameter === "T" ? (
+                    <TableCell>{row.T}</TableCell>
+                  ) : null}
+                  {parameter === "all" || parameter === "p" ? (
+                    <TableCell>{row.p}</TableCell>
+                  ) : null}
                 </TableRow>
               ))
             ) : (
