@@ -24,7 +24,7 @@ const App = () => {
     process.env.REACT_APP_BACKEND_URL ||
     (typeof window !== "undefined" && window.location.hostname === "localhost"
       ? "http://127.0.0.1:8000"
-      : "https://g.vercel.app");
+      : "https://pro-lime-tau.vercel.app/");
 
   useEffect(() => {
     const fetchStations = async () => {
