@@ -14,7 +14,7 @@ app = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://projektarbeitwid.vercel.app",
+        "https://pro-lime-tau.vercel.app/",
         "http://localhost:3000",               
     ],
     allow_credentials=True,
