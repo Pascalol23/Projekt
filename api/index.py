@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from datetime import datetime
 import json
 
-data_file_path = "/data/meteodaten_2023_daily.json")
+data_file_path = "/data/meteodaten_2023_daily.json"
 
 
 app = FastAPI(docs_url="/docs", openapi_url="/openapi.json")
