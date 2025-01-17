@@ -120,7 +120,7 @@ const App = () => {
       </Button>
 
       {charts && (
-        <div style={{ marginTop: "40px", textAlign: "center" }}>
+        <div style={{ marginTop: "50px", textAlign: "center" }}>
           <Typography variant="h5" gutterBottom>
             Diagramme:
           </Typography>
@@ -131,13 +131,13 @@ const App = () => {
               alignItems: "center",
             }}
           >
-            <div style={{ width: "80%", margin: "10px 0" }}>
+            <div style={{ width: "80%", margin: "12px 0" }}>
               <Vega spec={charts.rain_chart} />
             </div>
-            <div style={{ width: "80%", margin: "10px 0" }}>
+            <div style={{ width: "80%", margin: "12px 0" }}>
               <Vega spec={charts.temp_chart} />
             </div>
-            <div style={{ width: "80%", margin: "10px 0" }}>
+            <div style={{ width: "80%", margin: "12px 0" }}>
               <Vega spec={charts.pressure_chart} />
             </div>
           </div>
